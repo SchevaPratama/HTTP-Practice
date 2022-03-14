@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import '../models/player.dart';
 
 class Players with ChangeNotifier {
@@ -46,7 +47,8 @@ class Players with ChangeNotifier {
     });
   }
 
-  Future<void> editPlayer(String id, String name, String position, String image) {
+  Future<void> editPlayer(
+      String id, String name, String position, String image) {
     Uri url = Uri.parse(
         'https://http-req-8d682-default-rtdb.firebaseio.com/players/${id}.json');
 
@@ -79,5 +81,31 @@ class Players with ChangeNotifier {
       _allPlayer.removeWhere((element) => element.id == id);
       notifyListeners();
     });
+  }
+
+  Future initialData() async {
+    Uri url = Uri.parse(
+        'https://http-req-8d682-default-rtdb.firebaseio.com/players.json');
+
+    var hasilGet = await http.get(url);
+
+    var dataResponse = (json.decode(hasilGet.body) as Map<String, dynamic>);
+
+    dataResponse.forEach(
+      (key, value) {
+        DateTime dateTImeParse =
+            DateFormat("yyyy-mm-dd hh:mm:ss").parse(value['createdAt']);
+        _allPlayer.add(
+          Player(
+            id: key,
+            createdAt: dateTImeParse,
+            imageUrl: value["imageUrl"],
+            name: value["name"],
+            position: value["position"],
+          ),
+        );
+      },
+    );
+    notifyListeners();
   }
 }
