@@ -12,29 +12,48 @@ class AddPlayer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final players = Provider.of<Players>(context, listen: false);
+    addPlayer() {
+      players
+          .addPlayer(
+        nameController.text,
+        positionController.text,
+        imageController.text,
+      )
+          .then((value) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Berhasil ditambahkan"),
+            duration: Duration(seconds: 2),
+          ),
+        );
+        Navigator.pop(context);
+      }).catchError(
+        (err) => showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text('Terjadi Error $err'),
+            content: Text('Tidak dapat menambakan player'),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text('Okay'))
+            ],
+          ),
+        ),
+      );
+    }
+
+    ;
+
     return Scaffold(
       appBar: AppBar(
         title: Text("ADD PLAYER"),
         actions: [
           IconButton(
             icon: Icon(Icons.save),
-            onPressed: () {
-              players
-                  .addPlayer(
-                nameController.text,
-                positionController.text,
-                imageController.text,
-              )
-                  .then((value) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text("Berhasil ditambahkan"),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
-                Navigator.pop(context);
-              });
-            },
+            onPressed: addPlayer,
           ),
         ],
       ),
@@ -61,46 +80,14 @@ class AddPlayer extends StatelessWidget {
                 decoration: InputDecoration(labelText: "Image URL"),
                 textInputAction: TextInputAction.done,
                 controller: imageController,
-                onEditingComplete: () {
-                  players
-                      .addPlayer(
-                    nameController.text,
-                    positionController.text,
-                    imageController.text,
-                  )
-                      .then((value) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text("Berhasil ditambahkan"),
-                        duration: Duration(seconds: 2),
-                      ),
-                    );
-                    Navigator.pop(context);
-                  });
-                },
+                onEditingComplete: addPlayer,
               ),
               SizedBox(height: 50),
               Container(
                 width: double.infinity,
                 alignment: Alignment.centerRight,
                 child: OutlinedButton(
-                  onPressed: () {
-                    players
-                        .addPlayer(
-                      nameController.text,
-                      positionController.text,
-                      imageController.text,
-                    )
-                        .then((value) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text("Berhasil ditambahkan"),
-                          duration: Duration(seconds: 2),
-                        ),
-                      );
-                      Navigator.pop(context);
-                    });
-                  },
+                  onPressed: addPlayer,
                   child: Text(
                     "Submit",
                     style: TextStyle(

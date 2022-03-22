@@ -75,9 +75,22 @@ class _HomePageState extends State<HomePage> {
                       arguments: id,
                     );
                   },
-                  leading: CircleAvatar(
-                    backgroundImage: CachedNetworkImageProvider(
-                      allPlayerProvider.allPlayer[index].imageUrl!,
+                  leading: ClipRRect(
+                    borderRadius: BorderRadius.circular(50),
+                    child: Container(
+                      width: 50,
+                      height: 50,
+                      child: CachedNetworkImage(
+                        imageUrl: allPlayerProvider.allPlayer[index].imageUrl!,
+                        placeholder: (context, url) =>
+                            CircularProgressIndicator(),
+                        errorWidget: (context, url, error) => Container(
+                          width: 50,
+                          height: 50,
+                          child: Image.network(
+                              'https://forum.lstarcommunity.com/ext/dark1/memberavatarstatus/image/avatar.png'),
+                        ),
+                      ),
                     ),
                   ),
                   title: Text(
@@ -96,7 +109,22 @@ class _HomePageState extends State<HomePage> {
                             duration: Duration(milliseconds: 500),
                           ),
                         );
-                      });
+                      }).catchError(
+                        (err) => showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: Text('Terjadi Error $err'),
+                            content: Text('Tidak dapat menambakan player'),
+                            actions: [
+                              TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                  child: Text('Okay'))
+                            ],
+                          ),
+                        ),
+                      );
                     },
                     icon: Icon(Icons.delete),
                   ),

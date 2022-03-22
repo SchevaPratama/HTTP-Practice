@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -17,6 +18,41 @@ class DetailPlayer extends StatelessWidget {
         TextEditingController(text: selectPLayer.name);
     final TextEditingController positionController =
         TextEditingController(text: selectPLayer.position);
+    updatePlayer() {
+      players
+          .editPlayer(
+        playerId,
+        nameController.text,
+        positionController.text,
+        imageController.text,
+      )
+          .then((_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Berhasil diubah"),
+            duration: Duration(seconds: 2),
+          ),
+        );
+        Navigator.pop(context);
+      }).catchError(
+        (err) => showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text('Terjadi Error $err'),
+            content: Text('Tidak dapat menambakan player'),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text('Okay'))
+            ],
+          ),
+        ),
+      );
+      ;
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text("DETAIL PLAYER"),
@@ -27,15 +63,18 @@ class DetailPlayer extends StatelessWidget {
           child: Column(
             children: [
               ClipRRect(
-                borderRadius: BorderRadius.circular(100),
+                borderRadius: BorderRadius.circular(50),
                 child: Container(
                   width: 150,
                   height: 150,
-                  decoration: BoxDecoration(
-                    color: Colors.blue,
-                    image: DecorationImage(
-                      fit: BoxFit.cover,
-                      image: NetworkImage(imageController.text),
+                  child: CachedNetworkImage(
+                    imageUrl: imageController.text,
+                    placeholder: (context, url) => CircularProgressIndicator(),
+                    errorWidget: (context, url, error) => Container(
+                      width: 150,
+                      height: 150,
+                      child: Image.network(
+                          'https://forum.lstarcommunity.com/ext/dark1/memberavatarstatus/image/avatar.png'),
                     ),
                   ),
                 ),
@@ -58,48 +97,14 @@ class DetailPlayer extends StatelessWidget {
                 decoration: InputDecoration(labelText: "Image URL"),
                 textInputAction: TextInputAction.done,
                 controller: imageController,
-                onEditingComplete: () {
-                  players
-                      .editPlayer(
-                    playerId,
-                    nameController.text,
-                    positionController.text,
-                    imageController.text,
-                  )
-                      .then((_) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text("Berhasil diubah"),
-                        duration: Duration(seconds: 2),
-                      ),
-                    );
-                    Navigator.pop(context);
-                  });
-                },
+                onEditingComplete: updatePlayer,
               ),
               SizedBox(height: 50),
               Container(
                 width: double.infinity,
                 alignment: Alignment.centerRight,
                 child: OutlinedButton(
-                  onPressed: () {
-                    players
-                        .editPlayer(
-                      playerId,
-                      nameController.text,
-                      positionController.text,
-                      imageController.text,
-                    )
-                        .then((_) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text("Berhasil diubah"),
-                          duration: Duration(seconds: 2),
-                        ),
-                      );
-                      Navigator.pop(context);
-                    });
-                  },
+                  onPressed: updatePlayer,
                   child: Text(
                     "Edit",
                     style: TextStyle(
